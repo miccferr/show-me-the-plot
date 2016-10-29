@@ -10,11 +10,21 @@
   "author": "",
   "license": "BSD",
   "dependencies": {
-    "osm-stream": "0.0.13",
-    "ration": "0.0.0",
-    "underscore": "~1.4.4",
-    "reqwest": "~0.7.2",
+    "bufferutil": "^1.2.1",
+    "express": "^4.14.0",
+    "http": "0.0.0",
+    "johnny-five": "^0.10.3",
+    "lru-cache": "~4.0.0",
     "moment": "~2.0.0",
-    "lru-cache": "~4.0.0"
+    "osm-stream": "0.0.13",
+    "p5": "^0.5.4",
+    "ration": "0.0.0",
+    "request": "^2.76.0",
+    "reqwest": "~0.7.2",
+    "socket.io": "^1.5.1",
+    "socket.io-client": "^1.5.1",
+    "socketio": "^1.0.0",
+    "underscore": "~1.4.4",
+    "utf-8-validate": "^1.2.1"
   }
 }
