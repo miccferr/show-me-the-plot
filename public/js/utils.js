@@ -1,23 +1,19 @@
-// var canvas = document.createElement('canvas');
-
-function getBoundingBox (data) {
-  var bounds = {}, coords, point, latitude, longitude;
-
+function getBoundingBox(data) {
+  var bounds = {},
+      coords,
+      point,
+      latitude,
+      longitude;
   // We want to use the “features” key of the FeatureCollection (see above)
-  data = data.features;
-
+  var data = data.features;
   // Loop through each “feature”
   for (var i = 0; i < data.length; i++) {
-
     // Pull out the coordinates of this feature
     coords = data[i].geometry.coordinates[0];
-
     // For each individual coordinate in this feature's coordinates…
     for (var j = 0; j < coords.length; j++) {
-
       longitude = coords[j][0];
       latitude = coords[j][1];
-
       // Update the bounds recursively by comparing the current
       // xMin/xMax and yMin/yMax with the coordinate
       // we're currently checking
@@ -26,16 +22,14 @@ function getBoundingBox (data) {
       bounds.yMin = bounds.yMin < latitude ? bounds.yMin : latitude;
       bounds.yMax = bounds.yMax > latitude ? bounds.yMax : latitude;
     }
-
   }
-
   // Returns an object that contains the bounds of this GeoJSON
   // data. The keys of this object describe a box formed by the
   // northwest (xMin, yMin) and southeast (xMax, yMax) coordinates.
   return bounds;
 }
 
-function mercator (longitude, latitude) {
+function mercator(longitude, latitude) {
   var radius = 6378137;
   var max = 85.0511287798;
   var radians = Math.PI / 180;
@@ -46,66 +40,33 @@ function mercator (longitude, latitude) {
   point.y = radius * Math.log(Math.tan((Math.PI / 4) + (point.y / 2)));
 
   return point;
-}
+};
 
-function drawGeoJSON (width, height, bounds, data, canvas) {
-  var context, coords, point, latitude, longitude, xScale, yScale, scale;
+function coordinateToPoint(latitude, longitude, bounds, width, height) {
+    // project the boundaries in meters
+    var boundsPrjMAX = mercator(bounds.yMax, bounds.xMax)
+    var boundsPrjMIN = mercator(bounds.yMin, bounds.yMin)
 
-  // Get the drawing context from our <canvas> and
-  // set the fill to determine what color our map will be.
-  context = canvas.getContext('2d');
-  context.fillStyle = '#333';
-  console.log('canvas ',canvas);
-  console.log('this ',this);
+    // calc the scaling factor:
+    // how many times the geojson bbox max wdith(height) fits into the drawing area widht(height)?
+    // note: that's why you had to project the geojson bbox first
+    var xScale = width / Math.abs(boundsPrjMAX.x - boundsPrjMIN.x);
+    var yScale = height / Math.abs(boundsPrjMAX.y - boundsPrjMIN.y);
+    var scale = xScale < yScale ? xScale : yScale;
 
-  // Determine how much to scale our coordinates by
-  xScale = width / Math.abs(bounds.xMax - bounds.xMin);
-  yScale = height / Math.abs(bounds.yMax - bounds.yMin);
-  scale = xScale < yScale ? xScale : yScale;
+    var point = mercator(latitude, longitude)
 
-  // Again, we want to use the “features” key of
-  // the FeatureCollection
-  data = data.features;
+    return {
+      x: (point.x - bounds.xMin) * scale ,
+      y: (bounds.yMax - point.y) * scale
+    };
+  };
 
-  // Loop over the features…
-  for (var i = 0; i < data.length; i++) {
 
-    // …pulling out the coordinates…
-    coords = data[i].geometry.coordinates[0];
 
-    // …and for each coordinate…
-    for (var j = 0; j < coords.length; j++) {
 
-      longitude = coords[j][0];
-      latitude = coords[j][1];
-      point = mercator(longitude, latitude);
-
-      // Scale the points of the coordinate
-      // to fit inside our bounding box
-      point = {
-        x: (point.x - bounds.xMin) * scale,
-        y: (bounds.yMax - point.y) * scale
-      };
-
-      // If this is the first coordinate in a shape, start a new path
-      if (j === 0) {
-        this.context.beginPath();
-        this.context.moveTo(point.x, point.y);
-
-      // Otherwise just keep drawing
-      } else {
-        this.context.lineTo(point.x, point.y);
-      }
-    }
-
-    // Fill the path we just finished drawing with color
-    this.context.fill();
+  module.exports = {
+    getBoundingBox: getBoundingBox,
+    mercator: mercator,
+    coordinateToPoint: coordinateToPoint
   }
-}
-
-
-module.exports = {
-  getBoundingBox: getBoundingBox,
-  drawGeoJSON: drawGeoJSON,
-  mercator: mercator
-}
