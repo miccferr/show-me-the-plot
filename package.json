@@ -4,7 +4,10 @@
   "description": "see OSM edits happen in real time",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "browserify js/site.js > js/bundle.js",
+    "watch": " browserify js/site.js > js/bundle.js",
+    "server": "node server.js",
+    "dev": "npm run build && server && watch"
   },
   "repository": "",
   "author": "",
