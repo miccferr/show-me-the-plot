@@ -310,16 +310,15 @@ function drawWay(change, cb) {
           // store converted values in new array
           newCoords.push({"x":x, "y":y});
       })
+      return newCoords
     }
 
-    // passing wa.linestring and not the geojson from lineGroup.toGeoJSON()
+    // Using inestring as input instead of the geojson from lineGroup.toGeoJSON()
     // as it's more immediate
-    geojson2XYArray(way.linestring)
-
     // sending data to node server.
     // from there to arduino?
     // or maybe directly from client to arduino?
-    socket.emit ('newGeoJSONtoDraw', lineGroup.toGeoJSON() );
+    socket.emit ('newGeoJSONtoDraw', geojson2XYArray(way.linestring) );
 
 
 
