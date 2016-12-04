@@ -44048,53 +44048,49 @@ function drawWay(change, cb) {
 
     drawPt(way.linestring.pop());
 
+// -------------------------------------------
+// CONVERSION TIME!
+// Go over each feature..
+// and convert its coords from lat/long to XY
+// -------------------------------------------
 
-    var latitude    = 41.145556; // (φ)
-    var longitude   = -73.995;   // (λ)
-
-    // mercator to xy
-    function mercator2XY(d){
-      // console.log("this is ",d);
-      var mapWidth    = 200;
-      var mapHeight   = 100;
-      var x,y
-      console.log("prima", x);
-      for (var i = 0; i < d.geometry.coordinates.length; i++ ){
-        latitude    = d.geometry.coordinates[i][1]; // (φ)
-        longitude   = d.geometry.coordinates[i][0];   // (λ)
-        console.log(latitude,longitude);
-        // get x value
-        x = (longitude+180)*(mapWidth/360)
-
-        // convert from degrees to radians
-        var latRad = latitude*Math.PI/180;
-
-        // get y value
-        var mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
-        y     = (mapHeight/2)-(mapWidth*mercN/(2*Math.PI));
-        //  console.log({"x":x, "y":y});
-
-      }
-      console.log("dopo", x);
-      return {"x":x, "y":y}
-    }
+    var mapWidth    = 200;
+    var mapHeight   = 100;
 
 
-    // go thorugh every feature in the geojson object
+    // go thorugh every couple of coords in the coordinates array
     // construct an array of XY values from its coordinates
-    function geojson2XYArray(geojson) {
-
-        geojson.features.map(function (d) {
-          mercator2XY(d)
-        })
-
-
+    // ---------------------------------------------------
+    function geojson2XYArray(data) {
+      var newCoords=[];
+      var x,y;
+      var latitude    = 41.145556; // (φ)
+      var longitude   = -73.995;   // (λ)
+      data.map(function (d) {
+          latitude    = d[1]; // (φ)
+          longitude   = d[0];   // (λ)
+          // get x value
+          x = (longitude+180)*(mapWidth/360)
+          // convert from degrees to radians
+          var latRad = latitude*Math.PI/180;
+          // get y value
+          var mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
+          y     = (mapHeight/2)-(mapWidth*mercN/(2*Math.PI));
+          // store converted values in new array
+          newCoords.push({"x":x, "y":y});
+      })
     }
 
-    geojson2XYArray(lineGroup.toGeoJSON())
+    // passing wa.linestring and not the geojson from lineGroup.toGeoJSON()
+    // as it's more immediate
+    geojson2XYArray(way.linestring)
+
+    // sending data to node server.
+    // from there to arduino?
+    // or maybe directly from client to arduino?
     socket.emit ('newGeoJSONtoDraw', lineGroup.toGeoJSON() );
 
-    // console.log(lineGroup.toGeoJSON());
+
 
 
 }
@@ -60138,15 +60134,7 @@ utils.intFromLE = intFromLE;
 module.exports={
   "_args": [
     [
-      {
-        "raw": "elliptic@^6.0.0",
-        "scope": null,
-        "escapedName": "elliptic",
-        "name": "elliptic",
-        "rawSpec": "^6.0.0",
-        "spec": ">=6.0.0 <7.0.0",
-        "type": "range"
-      },
+      "elliptic@^6.0.0",
       "/usr/local/lib/node_modules/watchify/node_modules/browserify-sign"
     ]
   ],
@@ -60161,17 +60149,16 @@ module.exports={
     "tmp": "tmp/elliptic-6.3.2.tgz_1473938837205_0.3108903462998569"
   },
   "_npmUser": {
-    "name": "indutny",
-    "email": "fedor@indutny.com"
+    "email": "fedor@indutny.com",
+    "name": "indutny"
   },
   "_npmVersion": "3.10.3",
   "_phantomChildren": {},
   "_requested": {
-    "raw": "elliptic@^6.0.0",
-    "scope": null,
-    "escapedName": "elliptic",
     "name": "elliptic",
+    "raw": "elliptic@^6.0.0",
     "rawSpec": "^6.0.0",
+    "scope": null,
     "spec": ">=6.0.0 <7.0.0",
     "type": "range"
   },
@@ -60185,8 +60172,8 @@ module.exports={
   "_spec": "elliptic@^6.0.0",
   "_where": "/usr/local/lib/node_modules/watchify/node_modules/browserify-sign",
   "author": {
-    "name": "Fedor Indutny",
-    "email": "fedor@indutny.com"
+    "email": "fedor@indutny.com",
+    "name": "Fedor Indutny"
   },
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
@@ -60224,10 +60211,10 @@ module.exports={
   "gitHead": "cbace4683a4a548dc0306ef36756151a20299cd5",
   "homepage": "https://github.com/indutny/elliptic",
   "keywords": [
+    "Cryptography",
     "EC",
     "Elliptic",
-    "curve",
-    "Cryptography"
+    "curve"
   ],
   "license": "MIT",
   "main": "lib/elliptic.js",
@@ -72651,7 +72638,7 @@ ClientRequest.prototype._onFinish = function () {
 
 	var headersObj = self._headers
 	var body
-	if (opts.method === 'POST' || opts.method === 'PUT' || opts.method === 'PATCH') {
+	if (opts.method === 'POST' || opts.method === 'PUT' || opts.method === 'PATCH' || opts.method === 'MERGE') {
 		if (capability.blobConstructor) {
 			body = new global.Blob(self._body.map(function (buffer) {
 				return toArrayBuffer(buffer)

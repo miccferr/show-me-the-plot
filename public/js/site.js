@@ -279,53 +279,49 @@ function drawWay(change, cb) {
 
     drawPt(way.linestring.pop());
 
+// -------------------------------------------
+// CONVERSION TIME!
+// Go over each feature..
+// and convert its coords from lat/long to XY
+// -------------------------------------------
 
-    var latitude    = 41.145556; // (φ)
-    var longitude   = -73.995;   // (λ)
-
-    // mercator to xy
-    function mercator2XY(d){
-      // console.log("this is ",d);
-      var mapWidth    = 200;
-      var mapHeight   = 100;
-      var x,y
-      console.log("prima", x);
-      for (var i = 0; i < d.geometry.coordinates.length; i++ ){
-        latitude    = d.geometry.coordinates[i][1]; // (φ)
-        longitude   = d.geometry.coordinates[i][0];   // (λ)
-        console.log(latitude,longitude);
-        // get x value
-        x = (longitude+180)*(mapWidth/360)
-
-        // convert from degrees to radians
-        var latRad = latitude*Math.PI/180;
-
-        // get y value
-        var mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
-        y     = (mapHeight/2)-(mapWidth*mercN/(2*Math.PI));
-        //  console.log({"x":x, "y":y});
-
-      }
-      console.log("dopo", x);
-      return {"x":x, "y":y}
-    }
+    var mapWidth    = 200;
+    var mapHeight   = 100;
 
 
-    // go thorugh every feature in the geojson object
+    // go thorugh every couple of coords in the coordinates array
     // construct an array of XY values from its coordinates
-    function geojson2XYArray(geojson) {
-
-        geojson.features.map(function (d) {
-          mercator2XY(d)
-        })
-
-
+    // ---------------------------------------------------
+    function geojson2XYArray(data) {
+      var newCoords=[];
+      var x,y;
+      var latitude    = 41.145556; // (φ)
+      var longitude   = -73.995;   // (λ)
+      data.map(function (d) {
+          latitude    = d[1]; // (φ)
+          longitude   = d[0];   // (λ)
+          // get x value
+          x = (longitude+180)*(mapWidth/360)
+          // convert from degrees to radians
+          var latRad = latitude*Math.PI/180;
+          // get y value
+          var mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
+          y     = (mapHeight/2)-(mapWidth*mercN/(2*Math.PI));
+          // store converted values in new array
+          newCoords.push({"x":x, "y":y});
+      })
     }
 
-    geojson2XYArray(lineGroup.toGeoJSON())
+    // passing wa.linestring and not the geojson from lineGroup.toGeoJSON()
+    // as it's more immediate
+    geojson2XYArray(way.linestring)
+
+    // sending data to node server.
+    // from there to arduino?
+    // or maybe directly from client to arduino?
     socket.emit ('newGeoJSONtoDraw', lineGroup.toGeoJSON() );
 
-    // console.log(lineGroup.toGeoJSON());
+
 
 
 }
