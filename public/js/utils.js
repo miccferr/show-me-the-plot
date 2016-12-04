@@ -62,11 +62,32 @@ function coordinateToPoint(latitude, longitude, bounds, width, height) {
     };
   };
 
+function scalingFactor(xy_bounds, width, height) {
+  var xScale = width / Math.abs(xy_bounds[2] - xy_bounds[0]);
+  var yScale = height / Math.abs(xy_bounds[3] - xy_bounds[1]);
+  var scale = xScale < yScale ? xScale : yScale;
+  return scale
+}
 
-
+// function scalingFactorObject(bounds, width, height) {
+//   var xScale = width / Math.abs(bounds[2] - bounds[0]);
+//   var yScale = height / Math.abs(bounds[3] - bounds[1]);
+//   var scale = xScale < yScale ? xScale : yScale;
+//   console.log("non ci capisco niente", width , Math.abs(bounds[2] - bounds[0]));
+//   return scale
+// }
+function scalingFactorObject(sw, ne, width, height) {
+  var xScale = width / Math.abs(ne.x - sw.x);
+  var yScale = height / Math.abs(ne.y - sw.y);
+  var scale = xScale < yScale ? xScale : yScale;
+    // console.log("non ci capisco niente", width , Math.abs(ne.x - sw.x));
+  return scale
+}
 
   module.exports = {
     getBoundingBox: getBoundingBox,
     mercator: mercator,
-    coordinateToPoint: coordinateToPoint
+    coordinateToPoint: coordinateToPoint,
+    scalingFactor: scalingFactor,
+    scalingFactorObject:scalingFactorObject
   }
