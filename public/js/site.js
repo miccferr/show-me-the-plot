@@ -279,9 +279,53 @@ function drawWay(change, cb) {
 
     drawPt(way.linestring.pop());
 
+
+    var latitude    = 41.145556; // (φ)
+    var longitude   = -73.995;   // (λ)
+
+    // mercator to xy
+    function mercator2XY(d){
+      // console.log("this is ",d);
+      var mapWidth    = 200;
+      var mapHeight   = 100;
+      var x,y
+      console.log("prima", x);
+      for (var i = 0; i < d.geometry.coordinates.length; i++ ){
+        latitude    = d.geometry.coordinates[i][1]; // (φ)
+        longitude   = d.geometry.coordinates[i][0];   // (λ)
+        console.log(latitude,longitude);
+        // get x value
+        x = (longitude+180)*(mapWidth/360)
+
+        // convert from degrees to radians
+        var latRad = latitude*Math.PI/180;
+
+        // get y value
+        var mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
+        y     = (mapHeight/2)-(mapWidth*mercN/(2*Math.PI));
+        //  console.log({"x":x, "y":y});
+
+      }
+      console.log("dopo", x);
+      return {"x":x, "y":y}
+    }
+
+
+    // go thorugh every feature in the geojson object
+    // construct an array of XY values from its coordinates
+    function geojson2XYArray(geojson) {
+
+        geojson.features.map(function (d) {
+          mercator2XY(d)
+        })
+
+
+    }
+
+    geojson2XYArray(lineGroup.toGeoJSON())
     socket.emit ('newGeoJSONtoDraw', lineGroup.toGeoJSON() );
-    
-    console.log(lineGroup.toGeoJSON());
+
+    // console.log(lineGroup.toGeoJSON());
 
 
 }
