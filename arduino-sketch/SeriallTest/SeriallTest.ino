@@ -11,7 +11,7 @@
 
 const unsigned long BAUD_RATE = 9600;     // serial connection speed
 int inByte = 0;                           // incoming serial byte
-String json = "";
+String incoming = "";
 
 // The type of data that we want to extract from the page
 struct UserData {
@@ -27,10 +27,11 @@ void setup() {
 // ARDUINO entry point #2: runs over and over again forever
 void loop() {
   // if we get a valid byte, read analog ins:
-//  if (Serial.available() > 0) {
-    json = Serial.read();
+//  if (Serial.available()) {
+    
     Serial.println("incoming data");
-    Serial.println(json);
+    incoming = Serial.readString();
+    Serial.println(incoming);
     UserData userData;
 //      if (parseUserData(json, &userData)) {
 //        printUserData(&userData);

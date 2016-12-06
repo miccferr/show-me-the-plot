@@ -22,23 +22,28 @@ var port = new SerialPort(portName, function (err) {
   if (err) {
     return console.log('Error: ', err.message);
   }
-  // open socket
-  io.on('connection', function(socket){
-    console.log('a user connected');
-    // when socket gets data..
-      socket.on('newGeoJSONtoDraw', function(data){
-        console.log("Sending data to serial:" + JSON.stringify(data));
-        // ...redirect it to arduino via serialport
-        port.write(data, function(err) {
-          if (err) {
-            return console.log('Error on write: ', err.message);
-          }
-          console.log('message written');
-        });
-        // myPort.write(data, 'utf-8');
-     }); //close data incoming event
-
-  }); //close ws stream
-
-
 });
+
+
+// open socket
+io.on('connection', function(socket){
+  console.log('a user connected');
+  // when socket gets data..
+    socket.on('newGeoJSONtoDraw', function(data){
+      // open serialport
+      port.on('open', function() {
+      // console.log("Sending data to serial:" + JSON.stringify(data));
+      // ...redirect it to arduino via serialport
+      port.write(JSON.stringify(data), function(err) {
+        console.log("this is the message"+ JSON.stringify(data));
+        if (err) {
+          return console.log('Error on write: ', err.message);
+        }
+        console.log('message written');
+      port.close()
+      });
+
+      // myPort.write(data, 'utf-8');
+   }); //close data incoming event
+ }); // close serialport
+}); //close ws stream
