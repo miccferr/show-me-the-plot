@@ -21,7 +21,9 @@ portName = "/dev/cu.usbmodem1421";
 // var wss = new WebSocketServer({port: SERVER_PORT}); // the webSocket server
 var connections = new Array;            // list of connections to the server
 
-var port = new SerialPort(portName, function (err) {
+var port = new SerialPort(portName, {
+  baudRate: 9600
+}, function (err) {
   if (err) {
     return console.log('Error: ', err.message);
   }
