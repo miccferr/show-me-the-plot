@@ -51,9 +51,9 @@ function sendSerialData(data) {
 }
 
 function sendToSerial(data) {
-  console.log("sending to serial: " + data);
+  console.log("sending to serial: " + JSON.stringify(data));
   // port.write(data);
-  port.write("data*");
+  port.write(JSON.stringify(data));
 }
 
 function showPortClose() {

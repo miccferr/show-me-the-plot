@@ -293,7 +293,7 @@ function drawWay(change, cb) {
     // construct an array of XY values from its coordinates
     // ---------------------------------------------------
     function geojson2XYArray(data) {
-      var newCoords=[];
+      var newCoords={ "geometry" : [] };
       var x,y;
       var latitude    = 41.145556; // (φ)
       var longitude   = -73.995;   // (λ)
@@ -308,8 +308,10 @@ function drawWay(change, cb) {
           var mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
           y     = (mapHeight/2)-(mapWidth*mercN/(2*Math.PI));
           // store converted values in new array
-          newCoords.push({"x":x, "y":y});
+          newCoords.geometry.push({"X" :x, "Y": y});
+          console.log(newCoords);
       })
+
       return newCoords
     }
 
