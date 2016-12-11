@@ -308,7 +308,7 @@ function drawWay(change, cb) {
           var mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
           y     = (mapHeight/2)-(mapWidth*mercN/(2*Math.PI));
           // store converted values in new array
-          newCoords.geometry.push({"X" :x, "Y": y});
+          newCoords.geometry.push( [x,y] );
           console.log(newCoords);
       })
 

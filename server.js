@@ -71,8 +71,8 @@ function handleConnection(client) {
   console.log("New Connection");        // you have a new client
   connections.push(client);             // add this client to the connections array
 
-  client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
-
+  // client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
+  port.write(JSON.stringify("{geometry: [[34.5,56.7], [232.6453,234346599.0006]]}"));
   client.on('close', function() {           // when a client closes its connection
     console.log("connection closed");       // print it out
     var position = connections.indexOf(client); // get the client's position in the array
