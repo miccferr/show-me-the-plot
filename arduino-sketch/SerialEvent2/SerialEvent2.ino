@@ -95,14 +95,13 @@ void parseJson(const char * jsonString) {
     Serial.println("parseObject() failed");
     return;
   }
-
+  // list is the array holding all the coordinates
   JsonArray& list = root["geometry"];
-  JsonObject& coords = list[0];
-  JsonObject& firstElem = list[0];
-  float X = 10.2 ;
-//  firstElem["X"];
-  String latitude =  String(X);
-
-  Serial.println("latitude is " + latitude);
-
+  // iterate over the array and extract the coords by couple  
+ for (int arrIndex = 0; arrIndex < sizeof(list); arrIndex ++) {
+    double      latitude  = root[arrIndex][0];
+    double      longitude = root[arrIndex][1];  
+    String latitudeString =  String(X);
+    Serial.println("latitude is " + latitudeString);
+  }
 }
