@@ -19,7 +19,7 @@
 #include <SPI.h>
 #include <ArduinoJson.h>
 
-#define JSON_BUFF_DIMENSION 25000
+#define JSON_BUFF_DIMENSION 2000
 
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
@@ -29,21 +29,23 @@ boolean startJson = false;
 static char sprintfbuffer[15];
 
 
+
+
 void setup() {
+  DynamicJsonBuffer jsonBuffer2;
   // initialize serial:
   Serial.begin(9600);
-  text.reserve(JSON_BUFF_DIMENSION);
+    text.reserve(JSON_BUFF_DIMENSION);
+//  text.reserve(jsonBuffer2);
+//  text.reserve(3*JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1));
 }
 
 void loop() {
-  char c = 0;
-  
+  char c = 0;  
   if (Serial.available()) {
-    c = Serial.read();
-    
+    c = Serial.read();    
     // json contains equal number of open and close curly brackets, therefore by counting
     // the open and close occurences, we can determine when a json is completely received
-
     // endResponse == 0 means equal number of open and close curly brackets reached
     if (endResponse == 0 && startJson == true) {
       parseJson(text.c_str());  // parse c string text in parseJson function
@@ -66,6 +68,7 @@ void loop() {
     }
   }
 }
+
 /*
   SerialEvent occurs whenever a new data comes in the
   hardware serial RX.  This routine is run between each
@@ -88,7 +91,8 @@ void loop() {
 
 //Still lots of issues. See http://arduino.stackexchange.com/a/25831
 void parseJson(const char * jsonString) {
-  StaticJsonBuffer<4000> jsonBuffer;
+//  StaticJsonBuffer<1000> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer;
   
   // FIND FIELDS IN JSON TREE
   JsonObject& root = jsonBuffer.parseObject(jsonString);
@@ -98,6 +102,7 @@ void parseJson(const char * jsonString) {
   }
   // list is the array holding all the coordinates
   JsonArray& list = root["geometry"];
+  Serial.println("adasdasdasdasdasdasd ");
   Serial.println(sizeof(list));
   // iterate over the array and extract the coords by couple
   for (int i = 0; i < sizeof(list); i++) {
@@ -110,4 +115,24 @@ void parseJson(const char * jsonString) {
   
 }
 
+//------------------------------------------------------------------------------
+// instantly move the virtual plotter position
+// does not validate if the move is valid
+//static void teleport(float x,float y) {
+//  long L1,L2;
+//  IK(x,y,L1,L2);
+//  laststep1=L1;
+//  laststep2=L2;
+//}
+//------------------------------------------------------------------------------
+// Inverse Kinematics - turns XY coordinates into lengths L1,L2
+//static void IK(float x, float y, long &l1, long &l2) {
+//  // find length to M1
+//  float dy = y - limit_top;
+//  float dx = x - limit_left;
+//  l1 = floor( sqrt(dx*dx+dy*dy) / THREADPERSTEP1 );
+//  // find length to M2
+//  dx = limit_right - x;
+//  l2 = floor( sqrt(dx*dx+dy*dy) / THREADPERSTEP2 );
+//}
 
