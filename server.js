@@ -71,8 +71,9 @@ function handleConnection(client) {
   console.log("New Connection");        // you have a new client
   connections.push(client);             // add this client to the connections array
 
-  // client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
-  port.write(JSON.stringify("{geometry: [[34.5,56.7], [232.6453,234346599.0006]]}"));
+  client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
+  // comment the precedng/ uncomment the following to send test data to the arduino
+  // port.write(JSON.stringify("{geometry: [[34.5,56.7], [232.6453,234346599.0006]]}"));
   client.on('close', function() {           // when a client closes its connection
     console.log("connection closed");       // print it out
     var position = connections.indexOf(client); // get the client's position in the array
@@ -85,25 +86,3 @@ function broadcast(data) {
     connections[c].send(JSON.stringify(data)); // send the data to each connection
   }
 }
-
-// // open serialport
-// port.on('open', function() {
-//   // open socket
-//   io.on('connection', function(socket){
-//     console.log('a user connected');
-//     // when socket gets data..
-//       socket.on('newGeoJSONtoDraw', function(data){
-//       // console.log("Sending data to serial:" + JSON.stringify(data));
-//       // ...redirect it to arduino via serialport
-//       port.write(JSON.stringify(data), function(err) {
-//         console.log("this is the message"+ JSON.stringify(data));
-//         if (err) {
-//           return console.log('Error on write: ', err.message);
-//         }
-//         console.log('message written');
-//         port.close()
-//       });
-//       // myPort.write(data, 'utf-8');
-//    }); //close data incoming event
-//  }); // close serialport
-// }); //close ws stream
