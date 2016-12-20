@@ -3,6 +3,7 @@ var app     = express();
 var server  = require('http').Server(app);
 var io      = require('socket.io').listen(server);
 var SerialPort = require('serialport'); // include the library
+var osc = require("node-osc");
 
 server.listen(8080);
 app.use(express.static(__dirname + '/public'));
@@ -21,48 +22,66 @@ portName = "/dev/cu.usbmodem1421";
 // var wss = new WebSocketServer({port: SERVER_PORT}); // the webSocket server
 var connections = new Array;            // list of connections to the server
 
-var port = new SerialPort(portName, {
-  baudRate: 9600
-}, function (err) {
-  if (err) {
-    return console.log('Error: ', err.message);
-  }
-});
+// var port = new SerialPort(portName, {
+//   baudRate: 9600
+// }, function (err) {
+//   if (err) {
+//     return console.log('Error: ', err.message);
+//   }
+// });
 
+//
+// // set up event listeners for the serial events:
+// port.on('open', showPortOpen);
+// port.on('data', sendSerialData);
+// port.on('close', showPortClose);
+// port.on('error', showError);
+//
+// function showPortOpen() {
+//   console.log("serial port open");
+// }
+//
+// // this is called when new data comes into the serial port:
+// function sendSerialData(data) {
+//   // if there are webSocket connections, send the serial data
+//   // to all of them:
+//   console.log(Number(data));
+//   if (connections.length > 0) {
+//     broadcast(data);
+//   }
+// }
+//
+// function sendToSerial(data) {
+//   console.log("sending to serial: " + JSON.stringify(data));
+//   // port.write(data);
+//   port.write(JSON.stringify(data));
+// }
+//
+// function showPortClose() {
+//    console.log('port closed.');
+// }
+// // this is called when the serial port has an error:
+// function showError(error) {
+//   console.log('Serial port error: ' + error);
+// }
 
-// set up event listeners for the serial events:
-port.on('open', showPortOpen);
-port.on('data', sendSerialData);
-port.on('close', showPortClose);
-port.on('error', showError);
+// SEND DATA via OSC TO PD
+// -----------------------
+var client = new osc.Client('127.0.0.1', 3001);
+function sendToOSC(data) {
+  console.log("this is data", data.geometry);
+  data.geometry.map(function (d) {
+    if (d[0] || d[1] != null){
+    client.send('/oscAddress', d[0], d[1], function (err) {
+      if (err) {
+        console.error(new Error(err));
+      }
+      console.log("send");
+    });}
+  })
 
-function showPortOpen() {
-  console.log("serial port open");
 }
 
-// this is called when new data comes into the serial port:
-function sendSerialData(data) {
-  // if there are webSocket connections, send the serial data
-  // to all of them:
-  console.log(Number(data));
-  if (connections.length > 0) {
-    broadcast(data);
-  }
-}
-
-function sendToSerial(data) {
-  console.log("sending to serial: " + JSON.stringify(data));
-  // port.write(data);
-  port.write(JSON.stringify(data));
-}
-
-function showPortClose() {
-   console.log('port closed.');
-}
-// this is called when the serial port has an error:
-function showError(error) {
-  console.log('Serial port error: ' + error);
-}
 
 // ------------------------ webSocket Server event functions
 io.on('connection', handleConnection);
@@ -71,7 +90,7 @@ function handleConnection(client) {
   console.log("New Connection");        // you have a new client
   connections.push(client);             // add this client to the connections array
 
-  client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
+  client.on('newGeoJSONtoDraw', sendToOSC);      // when a client sends a message,
   // comment the precedng/ uncomment the following to send test data to the arduino
   // port.write(JSON.stringify("{geometry: [[34.5,56.7], [232.6453,234346599.0006]]}"));
   client.on('close', function() {           // when a client closes its connection

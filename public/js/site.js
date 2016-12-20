@@ -324,7 +324,6 @@ function drawWay(change, cb) {
 
 
 
-
 }
 
 doDrawWay();
