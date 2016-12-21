@@ -50,21 +50,17 @@ void loop() {
     if (endResponse == 0 && startJson == true) {
       parseJson(text.c_str());  // parse c string text in parseJson function
       text = "";                // clear text string for the next time
-      startJson = false;        // set startJson to false to indicate that a new message has not yet started
-      Serial.println("DOPPIA CONDIZIONE");
+      startJson = false;        // set startJson to false to indicate that a new message has not yet started      
     } 
     if (c == '{') {
       startJson = true;         // set startJson true to indicate json message has started
-      endResponse++;
-      Serial.println("APRO PARENTESI");
+      endResponse++;      
     }
     if (c == '}') {
-      endResponse--;
-      Serial.println("CHIUDO PARENTESI");
+      endResponse--;      
     }
     if (startJson == true) {
-      text += c;
-      Serial.println("APPENDO TESTO...");
+      text += c;      
     }
   }
 }
