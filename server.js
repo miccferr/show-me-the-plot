@@ -3,6 +3,9 @@ var app     = express();
 var server  = require('http').Server(app);
 var io      = require('socket.io').listen(server);
 var SerialPort = require('serialport'); // include the library
+var kue = require('kue'),
+    jobs = kue.createQueue();
+
 
 server.listen(8080);
 app.use(express.static(__dirname + '/public'));
@@ -64,6 +67,23 @@ function sendFakeData(){
   port.write(JSON.stringify(fakeDataLess));
 }
 
+// QUEUING JOBS: 1 job = 1 geojson (page re-freshed)
+function newJob (name,data){
+ name = name || 'Default_Name';
+ var job = jobs.create('new job', {
+   name: name,
+   data: data
+ });
+ job.on('complete', function (){
+     console.log('Job', job.id, 'with name', job.data.name, 'is    done');
+   })
+   .on('failed', function (){
+     console.log('Job', job.id, 'with name', job.data.name, 'has  failed');
+   });
+ job.save();
+}
+
+
 function showPortClose() {
    console.log('port closed.');
 }
@@ -79,10 +99,17 @@ function handleConnection(client) {
   console.log("New Connection");        // you have a new client
   connections.push(client);             // add this client to the connections array
 
-  // note: comment out for testing
+  // note: comment out while testing
   // client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
   // sending fake test data
-  setInterval(sendFakeData, 5000);
+  // setInterval(sendFakeData, 5000);
+  jobs.process('new job', data, function (job, done){
+    console.log("this is data from the job",  data);
+   /* carry out all the job function here */
+   done && done();
+  });
+  client.on('newGeoJSONtoDraw', newJob);
+
 
 
   // comment the precedng/ uncomment the following to send test data to the arduino
