@@ -7,7 +7,9 @@
     "build": "browserify public/js/site.js -o public/js/bundle.js",
     "watch": " watchify public/js/site.js -o public/js/bundle.js -v",
     "server": "node server.js",
-    "dev": "npm run server && npm run watch"
+    "server-no-arduino": "node server-no-arduino-test.js",
+    "dev": "npm run server && npm run watch",
+    "dev-no-arduino": "npm run server-no-arduino && npm run watch"
   },
   "repository": "",
   "author": "",
@@ -18,6 +20,7 @@
     "express": "^4.14.0",
     "http": "0.0.0",
     "johnny-five": "^0.10.3",
+    "kue": "^0.11.5",
     "lru-cache": "~4.0.0",
     "mercator-projection": "0.0.2",
     "moment": "~2.0.0",

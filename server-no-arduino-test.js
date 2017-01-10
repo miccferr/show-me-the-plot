@@ -24,48 +24,55 @@ portName = "/dev/cu.usbmodem1421";
 // var wss = new WebSocketServer({port: SERVER_PORT}); // the webSocket server
 var connections = new Array;            // list of connections to the server
 
-var port = new SerialPort(portName, {
-  baudRate: 115200
-}, function (err) {
-  if (err) {
-    return console.log('Error: ', err.message);
-  }
-});
+// var port = new SerialPort(portName, {
+//   baudRate: 115200
+// }, function (err) {
+//   if (err) {
+//     return console.log('Error: ', err.message);
+//   }
+// });
 
 
 // set up event listeners for the serial events:
-port.on('open', showPortOpen);
-port.on('data', sendSerialData);
-port.on('close', showPortClose);
-port.on('error', showError);
-
-function showPortOpen() {
-  console.log("serial port open");
-}
-
-// this is called when new data comes into the serial port:
-function sendSerialData(data) {
-  // if there are webSocket connections, send the serial data
-  // to all of them:
-  console.log(Number(data));
-  if (connections.length > 0) {
-    broadcast(data);
-  }
-}
-
-function sendToSerial(data) {
-  console.log("sending to serial: " + JSON.stringify(data));
-  // port.write(data);
-  port.write(JSON.stringify(data));
-
-}
-
-var fakeDataALot = {"geometry":[[98.83576322222223,30.111594289567424],[98.835763,30.111593488481503],[98.83576311111112,30.111592620638405],[98.8357633888889,30.111591819552462],[98.83576388888889,30.111591218737992],[98.83576450000001,30.111590818195005],[98.83576522222222,30.111590684680678],[98.83576594444445,30.111590818195005],[98.83576655555555,30.111591285495155],[98.835767,30.111591953066785],[98.83576727777778,30.111592754152728],[98.83576733333334,30.11159355523866],[98.83576711111112,30.111594423081737],[98.83576672222223,30.111595090653335],[98.83576616666667,30.11159562471059],[98.8357655,30.11159582498208],[98.83576483333334,30.11159582498208],[98.83576416666666,30.111595557953432]]}
-var fakeDataLess = {"geometry":[[98.83576322222223,30.111594289567424],[98.835763,30.111593488481503],[98.83576416666666,30.111595557953432]]}
-function sendFakeData(){
-  console.log("sending FAKE DATA via serial: " + JSON.stringify(fakeDataLess));
-  port.write(JSON.stringify(fakeDataLess));
-}
+// port.on('open', showPortOpen);
+// port.on('data', sendSerialData);
+// port.on('close', showPortClose);
+// port.on('error', showError);
+//
+// function showPortOpen() {
+//   console.log("serial port open");
+// }
+//
+// function showPortClose() {
+//    console.log('port closed.');
+// }
+// // this is called when the serial port has an error:
+// function showError(error) {
+//   console.log('Serial port error: ' + error);
+// }
+//
+// // this is called when new data comes into the serial port:
+// function sendSerialData(data) {
+//   // if there are webSocket connections, send the serial data
+//   // to all of them:
+//   console.log(Number(data));
+//   if (connections.length > 0) {
+//     broadcast(data);
+//   }
+// }
+//
+// function sendToSerial(data) {
+//   console.log("sending to serial: " + JSON.stringify(data));
+//   // port.write(data);
+//   port.write(JSON.stringify(data));
+// }
+//
+// var fakeDataALot = {"geometry":[[98.83576322222223,30.111594289567424],[98.835763,30.111593488481503],[98.83576311111112,30.111592620638405],[98.8357633888889,30.111591819552462],[98.83576388888889,30.111591218737992],[98.83576450000001,30.111590818195005],[98.83576522222222,30.111590684680678],[98.83576594444445,30.111590818195005],[98.83576655555555,30.111591285495155],[98.835767,30.111591953066785],[98.83576727777778,30.111592754152728],[98.83576733333334,30.11159355523866],[98.83576711111112,30.111594423081737],[98.83576672222223,30.111595090653335],[98.83576616666667,30.11159562471059],[98.8357655,30.11159582498208],[98.83576483333334,30.11159582498208],[98.83576416666666,30.111595557953432]]}
+// var fakeDataLess = {"geometry":[[98.83576322222223,30.111594289567424],[98.835763,30.111593488481503],[98.83576416666666,30.111595557953432]]}
+// function sendFakeData(){
+//   console.log("sending FAKE DATA via serial: " + JSON.stringify(fakeDataLess));
+//   port.write(JSON.stringify(fakeDataLess));
+// }
 
 // QUEUING JOBS: 1 job = 1 geojson (page re-freshed)
 function newJob (name,data){
@@ -83,15 +90,6 @@ function newJob (name,data){
  job.save();
 }
 
-
-function showPortClose() {
-   console.log('port closed.');
-}
-// this is called when the serial port has an error:
-function showError(error) {
-  console.log('Serial port error: ' + error);
-}
-
 // ------------------------ webSocket Server event functions
 io.on('connection', handleConnection);
 
@@ -103,8 +101,8 @@ function handleConnection(client) {
   // client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
   // sending fake test data
   // setInterval(sendFakeData, 5000);
-  jobs.process('new job', data, function (job, done){
-    console.log("this is data from the job",  data);
+  jobs.process('new job', function (job, done){
+    console.log("this is data from the job", job);
    /* carry out all the job function here */
    done && done();
   });
