@@ -80,6 +80,7 @@ function sendFakeData2FakeArduino() {
     console.log("now i am sendin data from the job");
    /* carry out all the job function here */
    io.emit('newFigureToDraw', job)
+   console.log("mandato i dati capo");
    done && done();
   });
 }
@@ -100,7 +101,6 @@ function newJob (name,data){
  //     console.log('Job', job.id, 'with name', job.data.name, 'has  failed');
  //   });
  job.save();
-
 }
 
 
@@ -124,10 +124,7 @@ function handleConnection(client) {
   // });
 
   client.on('newGeoJSONtoDraw', newJob);
-  client.on("iAmReadySendMeStuff", function () {
-    console.log("mandato i dati capo");
-    sendFakeData2FakeArduino();
-  });
+  client.on("iAmReadySendMeStuff", sendFakeData2FakeArduino);
 
   // comment the precedng/ uncomment the following to send test data to the arduino
   // port.write(JSON.stringify("{geometry: [[34.5,56.7], [232.6453,234346599.0006]]}"));

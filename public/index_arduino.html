@@ -9,16 +9,16 @@
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script type="text/javascript">
       var socket = io();
-      
+
       function youClicked() {
-        socket.emit('iAmReadySendMeStuff',function () {
-          console.log("i am ready to work! send me stuff!");
-          socket.on('newFigureToDraw', function (data) {
-            console.log("pretendin I'm moving the motors to drwa the data..BZZZZ");
-            console.log(data);
-          });
-        });
+        socket.emit('iAmReadySendMeStuff');
       };
+      socket.on('newFigureToDraw', function (data) {
+        console.log("pretendin I'm moving the motors to drwa the data..BZZZZ");
+        console.log(data);
+      });
+
+
       </script>
   </body>
 </html>
