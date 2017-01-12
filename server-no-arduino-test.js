@@ -74,6 +74,16 @@ var connections = new Array;            // list of connections to the server
 //   port.write(JSON.stringify(fakeDataLess));
 // }
 
+function sendFakeData2FakeArduino() {
+  // this is the consumer side. you should put the arduino-communicating code here..
+  jobs.process('new job', function (job, done){
+    console.log("now i am sendin data from the job");
+   /* carry out all the job function here */
+   io.emit('newFigureToDraw', job)
+   done && done();
+  });
+}
+
 // QUEUING JOBS: 1 job = 1 geojson (page re-freshed)
 function newJob (name,data){
  name = name || 'Default_Name';
@@ -81,14 +91,18 @@ function newJob (name,data){
    name: name,
    data: data
  });
- job.on('complete', function (){
-     console.log('Job', job.id, 'with name', job.data.name, 'is    done');
-   })
-   .on('failed', function (){
-     console.log('Job', job.id, 'with name', job.data.name, 'has  failed');
-   });
+ // i believe this are to manipulate the data before storing it into Redis...
+ // kinda pointless in my case, as I just want to save it straightaway for later usage..
+ // job.on('complete', function (){
+ //     console.log('Job', job.id, 'with name', job.data.name, 'is    done');
+ //   })
+ //   .on('failed', function (){
+ //     console.log('Job', job.id, 'with name', job.data.name, 'has  failed');
+ //   });
  job.save();
+
 }
+
 
 // ------------------------ webSocket Server event functions
 io.on('connection', handleConnection);
@@ -101,14 +115,19 @@ function handleConnection(client) {
   // client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
   // sending fake test data
   // setInterval(sendFakeData, 5000);
-  jobs.process('new job', function (job, done){
-    console.log("this is data from the job", job);
-   /* carry out all the job function here */
-   done && done();
-  });
+
+  // this is the consumer side. you should put the arduino-communicating code here..
+  // jobs.process('new job', function (job, done){
+  //   console.log("this is data from the job", job);
+  //  /* carry out all the job function here */
+  //  done && done();
+  // });
+
   client.on('newGeoJSONtoDraw', newJob);
-
-
+  client.on("iAmReadySendMeStuff", function () {
+    console.log("mandato i dati capo");
+    sendFakeData2FakeArduino();
+  });
 
   // comment the precedng/ uncomment the following to send test data to the arduino
   // port.write(JSON.stringify("{geometry: [[34.5,56.7], [232.6453,234346599.0006]]}"));
