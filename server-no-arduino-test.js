@@ -74,35 +74,51 @@ var connections = new Array;            // list of connections to the server
 //   port.write(JSON.stringify(fakeDataLess));
 // }
 
+
+
+// with kue
+// --------------
+// function sendFakeData2FakeArduino() {
+//   // this is the consumer side. you should put the arduino-communicating code here..
+//   jobs.process('new job', function (job, done){
+//     console.log("now i am sendin data from the job");
+//    /* carry out all the job function here */
+//    io.emit('newFigureToDraw', job)
+//    console.log("mandato i dati capo");
+//    done && done();
+//   });
+// }
+// // QUEUING JOBS: 1 job = 1 geojson (page re-freshed)
+// function newJob (name,data){
+//  name = name || 'Default_Name';
+//  var job = jobs.create('new job', {
+//    name: name,
+//    data: data
+//  });
+//  // i believe this are to manipulate the data before storing it into Redis...
+//  // kinda pointless in my case, as I just want to save it straightaway for later usage..
+//  // job.on('complete', function (){
+//  //     console.log('Job', job.id, 'with name', job.data.name, 'is    done');
+//  //   })
+//  //   .on('failed', function (){
+//  //     console.log('Job', job.id, 'with name', job.data.name, 'has  failed');
+//  //   });
+//  job.save();
+// }
+
+
+// with simple array
+// --------------
+var geomQueue = [];
+function newJob(data) {
+  console.log("added new geometry to the queue");
+  geomQueue.push(data);
+};
 function sendFakeData2FakeArduino() {
-  // this is the consumer side. you should put the arduino-communicating code here..
-  jobs.process('new job', function (job, done){
-    console.log("now i am sendin data from the job");
-   /* carry out all the job function here */
-   io.emit('newFigureToDraw', job)
-   console.log("mandato i dati capo");
-   done && done();
-  });
-}
-
-// QUEUING JOBS: 1 job = 1 geojson (page re-freshed)
-function newJob (name,data){
- name = name || 'Default_Name';
- var job = jobs.create('new job', {
-   name: name,
-   data: data
- });
- // i believe this are to manipulate the data before storing it into Redis...
- // kinda pointless in my case, as I just want to save it straightaway for later usage..
- // job.on('complete', function (){
- //     console.log('Job', job.id, 'with name', job.data.name, 'is    done');
- //   })
- //   .on('failed', function (){
- //     console.log('Job', job.id, 'with name', job.data.name, 'has  failed');
- //   });
- job.save();
-}
-
+  var geomToBeSent = geomQueue.pop();
+  io.emit('newFigureToDraw', geomToBeSent);
+  console.log("sent new geometry to be drawn");
+};
 
 // ------------------------ webSocket Server event functions
 io.on('connection', handleConnection);
@@ -113,16 +129,15 @@ function handleConnection(client) {
 
   // note: comment out while testing
   // client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
+
   // sending fake test data
   // setInterval(sendFakeData, 5000);
 
-  // this is the consumer side. you should put the arduino-communicating code here..
-  // jobs.process('new job', function (job, done){
-  //   console.log("this is data from the job", job);
-  //  /* carry out all the job function here */
-  //  done && done();
-  // });
+  // with kue
+  // client.on('newGeoJSONtoDraw', newJob);
+  // client.on("iAmReadySendMeStuff", sendFakeData2FakeArduino);
 
+  // with simple array
   client.on('newGeoJSONtoDraw', newJob);
   client.on("iAmReadySendMeStuff", sendFakeData2FakeArduino);
 
