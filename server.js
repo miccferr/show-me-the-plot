@@ -67,23 +67,6 @@ function sendFakeData(){
   port.write(JSON.stringify(fakeDataLess));
 }
 
-// QUEUING JOBS: 1 job = 1 geojson (page re-freshed)
-function newJob (name,data){
- name = name || 'Default_Name';
- var job = jobs.create('new job', {
-   name: name,
-   data: data
- });
- job.on('complete', function (){
-     console.log('Job', job.id, 'with name', job.data.name, 'is    done');
-   })
-   .on('failed', function (){
-     console.log('Job', job.id, 'with name', job.data.name, 'has  failed');
-   });
- job.save();
-}
-
-
 function showPortClose() {
    console.log('port closed.');
 }
@@ -91,6 +74,20 @@ function showPortClose() {
 function showError(error) {
   console.log('Serial port error: ' + error);
 }
+
+// with simple array
+// --------------
+var geomQueue = [];
+function newJob(data) {
+  console.log("added new geometry to the queue");
+  geomQueue.push(data);
+};
+function sendFakeData2FakeArduino() {
+  var geomToBeSent = geomQueue.pop();
+  io.emit('newFigureToDraw', geomToBeSent);
+  console.log("sent new geometry to be drawn");
+};
+
 
 // ------------------------ webSocket Server event functions
 io.on('connection', handleConnection);
@@ -103,13 +100,14 @@ function handleConnection(client) {
   // client.on('newGeoJSONtoDraw', sendToSerial);      // when a client sends a message,
   // sending fake test data
   // setInterval(sendFakeData, 5000);
-  jobs.process('new job', data, function (job, done){
-    console.log("this is data from the job",  data);
-   /* carry out all the job function here */
-   done && done();
-  });
-  client.on('newGeoJSONtoDraw', newJob);
 
+  // with simple array
+  client.on('newGeoJSONtoDraw', newJob);
+  // al posto della riga sotto devi implementare adesso la versione
+  // client.on("iAmReadySendMeStuff", sendFakeData2FakeArduino);
+  // che ascolta lárduino sulla seriale
+  // e quando gli arriva uno 1 manda i dati prelevati dalla coda
+  // port.read(function () { })
 
 
   // comment the precedng/ uncomment the following to send test data to the arduino
