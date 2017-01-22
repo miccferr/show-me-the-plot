@@ -45,6 +45,7 @@ port.on('data', function (data) {
     port.write(JSON.stringify("/n"));
   }
 })
+
 // port.on('data', sendSerialData);
 port.on('close', showPortClose);
 port.on('error', showError);
