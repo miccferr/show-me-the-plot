@@ -40,9 +40,8 @@ port.on('data', function (data) {
   console.log('Data: ' + JSON.stringify(data));
   console.log(data[0]);
   if (data[0] == 1 ) {
-    console.log("Sending Data to Arduino Boss!")
-    port.write("test")
-    port.write(JSON.stringify("/n"));
+    console.log("Sending Data to Arduino Boss!")    
+    port.write("ciaomamma\n");
   }
 })
 

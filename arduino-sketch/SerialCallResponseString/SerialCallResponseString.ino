@@ -48,6 +48,7 @@ void loop() {
     inputString = "";
     stringComplete = false;
     iAmFreeSendMeData = true;
+    Serial.write(1);  
   }
 }
 
@@ -67,18 +68,19 @@ void establishContact() {
 */
 void serialEvent() {
   //    // if we get a valid byte, read analog ins:
-  //    if (Serial.available() > 0 ) {
+      if (Serial.available() > 0 ) {
   
   //  while still assembling data..keep sending!
-  while (iAmFreeSendMeData) {
+//  while (iAmFreeSendMeData) {
     // get the new byte:
     char inChar = (char)Serial.read();
     // add it to the inputString:
-    inputString += inChar;
-    Serial.write(0);
+    inputString += inChar;   
+    Serial.println(inputString);
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
-    if (inChar == '\n') {
+    if (inChar == '\n') {      
+      Serial.write(0);    
       stringComplete = true;
       iAmFreeSendMeData = false;
     }
