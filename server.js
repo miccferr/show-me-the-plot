@@ -37,13 +37,13 @@ var port = new SerialPort(portName, {
 // set up event listeners for the serial events:
 port.on('open', showPortOpen);
 port.on('data', function (data) {
-  console.log('Data: ' + JSON.stringify(data));
-  console.log(data[0]);
-  if (data[0] == 1 ) {
+  // console.log('Data: ' + JSON.stringify(data));
+  console.log("This is the raw data: ", data.toString());  
+  if (data.toString() == "a" ) {
     console.log("Sending Data to Arduino Boss!")    
     port.write("ciaomamma\n");
   }
-})
+});
 
 // port.on('data', sendSerialData);
 port.on('close', showPortClose);
