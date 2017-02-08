@@ -38,7 +38,11 @@ port.on('data', function (data) {
   console.log("This is the raw data: ", data.toString());  
   if (data.toString() == "a" ) {
     console.log("Sending Data to Arduino Boss!")    
-    port.write("ciaomamma\n");
+    var geomToBeSent = geomQueue.pop();
+    if(geomQueue.length != 0){
+      console.log(geomToBeSent)
+      port.write(geomToBeSent);
+    }    
   }
 });
 
@@ -112,18 +116,19 @@ function showError(error) {
 
 // with simple array
 // --------------
-var geomQueue = [];
+var geomQueue = [[0]];
 
 function newJob(data) {
   console.log("added new geometry to the queue");
+  console.log("this is the original data from the client", data);
   geomQueue.push(data);
 };
 
-function sendFakeData2FakeArduino() {
-  var geomToBeSent = geomQueue.pop();
-  io.emit('newFigureToDraw', geomToBeSent);
-  console.log("sent new geometry to be drawn");
-};
+// function sendFakeData2FakeArduino() {
+//   var geomToBeSent = geomQueue.pop();
+//   io.emit('newFigureToDraw', geomToBeSent);
+//   console.log("sent new geometry to be drawn");
+// };
 
 
 // ------------------------ webSocket Server event functions
