@@ -6,8 +6,11 @@ var SerialPort = require('serialport'); // include the library
 
 server.listen(8080);
 app.use(express.static(__dirname + '/public'));
+var connections = new Array; // list of connections to the server
 
-
+// ------------------------------------------------
+// SerialPort Communication
+// ------------------------------------------------
 // get port name from the command line:
 // portName = process.argv[2];
 portName = "/dev/cu.usbmodem1421";
@@ -18,9 +21,6 @@ portName = "/dev/cu.usbmodem1421";
 // parser: serialport.parsers.readline("\n")
 // });
 
-// var wss = new WebSocketServer({port: SERVER_PORT}); // the webSocket server
-var connections = new Array; // list of connections to the server
-
 var port = new SerialPort(portName, {
   baudRate: 9600,
   // parser: SerialPort.parsers.byteLength(5)
@@ -30,23 +30,9 @@ var port = new SerialPort(portName, {
   }
 });
 
-
 // set up event listeners for the serial events:
 port.on('open', showPortOpen);
-port.on('data', function (data) {
-  // console.log('Data: ' + JSON.stringify(data));
-  console.log("This is the raw data: ", data.toString());  
-  if (data.toString() == "a" ) {
-    console.log("Sending Data to Arduino Boss!")    
-    var geomToBeSent = geomQueue.pop();
-    if(geomQueue.length != 0){
-      console.log(geomToBeSent)
-      port.write(geomToBeSent);
-    }    
-  }
-});
-
-// port.on('data', sendSerialData);
+port.on('data', sendSerialData);
 port.on('close', showPortClose);
 port.on('error', showError);
 
@@ -55,20 +41,30 @@ function showPortOpen() {
 }
 
 // this is called when new data comes into the serial port:
-function sendSerialData(data) {
-  // if there are webSocket connections, send the serial data
-  // to all of them:
-  console.log(Number(data));
-  if (connections.length > 0) {
-    broadcast(data);
+function sendSerialData(data) {  
+  // console.log('Data: ' + JSON.stringify(data));
+  console.log("This is the raw data: ", data.toString());
+  if (data.toString() == "a") {
+    console.log("Sending Data to Arduino Boss!")
+    var geomToBeSent = geomQueue.pop();
+    if (geomQueue.length != 0) {
+      console.log(geomToBeSent)
+      port.write(geomToBeSent);
+    }
   }
 }
 
-function sendToSerial(data) {
-  console.log("sending to serial: " + JSON.stringify(data));
-  // port.write(data);
-  port.write(JSON.stringify(data));
+function sendFakeData() {
+  console.log("sending FAKE DATA via serial: " + JSON.stringify(fakeDataLess));
+  port.write(JSON.stringify(fakeDataLess));
+}
 
+function showPortClose() {
+  console.log('port closed.');
+}
+// this is called when the serial port has an error:
+function showError(error) {
+  console.log('Serial port error: ' + error);
 }
 
 var fakeDataALot = {
@@ -101,37 +97,37 @@ var fakeDataLess = {
   ]
 }
 
-function sendFakeData() {
-  console.log("sending FAKE DATA via serial: " + JSON.stringify(fakeDataLess));
-  port.write(JSON.stringify(fakeDataLess));
-}
-
-function showPortClose() {
-  console.log('port closed.');
-}
-// this is called when the serial port has an error:
-function showError(error) {
-  console.log('Serial port error: ' + error);
-}
-
-// with simple array
-// --------------
-var geomQueue = [[0]];
+// ------------------------------------------------
+// Queuing implemented with vanilla JS data structs
+// ------------------------------------------------
+var geomQueue = [
+  [0]
+];
 
 function newJob(data) {
   console.log("added new geometry to the queue");
   console.log("this is the original data from the client", data);
-  geomQueue.push(data);
+  // leave out of queue geometries with out of scale coordinates 
+  if (noGreaterThan100(fakeData)) {    
+    geomQueue.push(data)
+  };
 };
 
-// function sendFakeData2FakeArduino() {
-//   var geomToBeSent = geomQueue.pop();
-//   io.emit('newFigureToDraw', geomToBeSent);
-//   console.log("sent new geometry to be drawn");
-// };
+function noGreaterThan100(data) {
+  data.geometry.map(function(e){
+    e.map(function(d){
+      if (d > 100){
+        return false
+      }else{
+        return true
+      }
+    })
+  })
+}
 
-
-// ------------------------ webSocket Server event functions
+// ------------------------------------------------
+//  Client-Server Communication via webSockets
+// -------------------------------------------
 io.on('connection', handleConnection);
 
 function handleConnection(client) {
@@ -149,10 +145,6 @@ function handleConnection(client) {
   // client.on("iAmReadySendMeStuff", sendFakeData2FakeArduino);
   // i'm now listening for a  "data" event on the SerialPort comm
   //  by default SerialPort has its own serial parsers which emit events, i.e. data
-
-
-
-
 
   // comment the precedng/ uncomment the following to send test data to the arduino
   // port.write(JSON.stringify("{geometry: [[34.5,56.7], [232.6453,234346599.0006]]}"));
