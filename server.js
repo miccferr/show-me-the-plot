@@ -3,9 +3,6 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var SerialPort = require('serialport'); // include the library
-var kue = require('kue'),
-  jobs = kue.createQueue();
-
 
 server.listen(8080);
 app.use(express.static(__dirname + '/public'));
